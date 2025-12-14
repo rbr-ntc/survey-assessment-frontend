@@ -113,14 +113,14 @@ body {
         border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 20px;
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        transition: all 0.3s ease;
+        transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        will-change: background, border-color, box-shadow;
     }
     
     .glass-card:hover {
         background: rgba(255, 255, 255, 0.15);
         border-color: rgba(255, 255, 255, 0.3);
         box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-        transform: translateY(-2px);
     }
     
     .glass-input {
@@ -152,9 +152,10 @@ body {
         border-radius: 12px;
         color: white;
         font-weight: 600;
-        transition: all 0.3s ease;
+        transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         position: relative;
         overflow: hidden;
+        will-change: background, border-color, box-shadow;
     }
     
     .glass-button::before {
@@ -166,6 +167,7 @@ body {
         height: 100%;
         background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
         transition: left 0.5s;
+        will-change: left;
     }
     
     .glass-button:hover::before {
@@ -176,11 +178,10 @@ body {
         background: rgba(255, 255, 255, 0.25);
         border-color: rgba(255, 255, 255, 0.4);
         box-shadow: 0 0 20px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        transform: translateY(-1px);
     }
     
     .glass-button:active {
-        transform: translateY(0);
+        background: rgba(255, 255, 255, 0.2);
     }
     
     .auth-bg {
@@ -199,12 +200,8 @@ body {
         height: 200%;
         background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
         background-size: 50px 50px;
-        animation: float 20s infinite linear;
-    }
-    
-    @keyframes float {
-        0% { transform: translate(0, 0) rotate(0deg); }
-        100% { transform: translate(-50px, -50px) rotate(360deg); }
+        /* Remove animation to prevent flickering - use static pattern instead */
+        will-change: auto;
     }
 }
 
