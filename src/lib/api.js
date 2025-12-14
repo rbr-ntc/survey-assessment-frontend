@@ -13,28 +13,34 @@ class ApiClient {
 
 	/**
 	 * Set tokens in localStorage (for cross-origin support) and cookies (fallback)
+	 * Returns immediately after saving to localStorage (synchronous operation)
 	 */
 	async setTokens(accessToken, refreshToken) {
-		// Store tokens in localStorage for cross-origin support
+		// Store tokens in localStorage for cross-origin support (synchronous)
 		if (typeof window !== 'undefined') {
 			localStorage.setItem('access_token', accessToken)
 			localStorage.setItem('refresh_token', refreshToken)
-			console.log('[API] Tokens saved to localStorage')
+			console.log('[API] Tokens saved to localStorage synchronously')
+			
+			// Verify immediately
+			const saved = localStorage.getItem('access_token')
+			if (!saved || saved !== accessToken) {
+				console.error('[API] CRITICAL: Token not saved correctly!')
+			}
 		} else {
 			console.warn('[API] Cannot save tokens - not in browser environment')
 		}
 		
 		// Also set in httpOnly cookies via API route (for same-origin fallback)
-		try {
-			await fetch('/api/auth/set-tokens', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ accessToken, refreshToken }),
-			})
-		} catch (error) {
+		// This is async but we don't wait for it - localStorage is already set
+		fetch('/api/auth/set-tokens', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ accessToken, refreshToken }),
+		}).catch(error => {
 			// If cookie setting fails, that's okay - we have localStorage
 			console.warn('[API] Failed to set tokens in cookies:', error)
-		}
+		})
 	}
 
 	/**
@@ -112,7 +118,7 @@ class ApiClient {
 
 		// Get access token from localStorage (only in browser)
 		let accessToken = null
-		if (typeof window !== 'undefined') {
+				if (typeof window !== 'undefined') {
 			accessToken = localStorage.getItem('access_token')
 		}
 		

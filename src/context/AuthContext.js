@@ -1,8 +1,8 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { apiClient } from '@/lib/api'
+import { useRouter } from 'next/navigation'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 const AuthContext = createContext()
 
@@ -40,8 +40,9 @@ export function AuthProvider({ children }) {
 		try {
 			setError(null)
 			const data = await apiClient.login(email, password)
-			// Wait a bit for cookies to be set before checking auth
-			await new Promise(resolve => setTimeout(resolve, 100))
+			// Tokens are saved synchronously to localStorage, so we can check auth immediately
+			// Small delay to ensure any async operations complete
+			await new Promise(resolve => setTimeout(resolve, 50))
 			await checkAuth() // Refresh user data
 			return data
 		} catch (err) {
@@ -53,13 +54,19 @@ export function AuthProvider({ children }) {
 	const register = async (email, password, password_confirm, name) => {
 		try {
 			setError(null)
-			const data = await apiClient.register(email, password, password_confirm, name)
+			const data = await apiClient.register(
+				email,
+				password,
+				password_confirm,
+				name
+			)
 			return data
 		} catch (err) {
-			const errorMessage = typeof err.message === 'string' 
-				? err.message 
-				: typeof err === 'string' 
-					? err 
+			const errorMessage =
+				typeof err.message === 'string'
+					? err.message
+					: typeof err === 'string'
+					? err
 					: 'Ошибка регистрации'
 			setError(errorMessage)
 			throw err
@@ -91,7 +98,7 @@ export function AuthProvider({ children }) {
 		}
 	}
 
-	const resendVerificationCode = async (email) => {
+	const resendVerificationCode = async email => {
 		try {
 			setError(null)
 			return await apiClient.resendVerificationCode(email)
@@ -101,7 +108,7 @@ export function AuthProvider({ children }) {
 		}
 	}
 
-	const forgotPassword = async (email) => {
+	const forgotPassword = async email => {
 		try {
 			setError(null)
 			return await apiClient.forgotPassword(email)
