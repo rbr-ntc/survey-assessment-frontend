@@ -53,6 +53,11 @@ class ApiClient {
 	async request(endpoint, options = {}) {
 		const url = `${this.baseURL}${endpoint}`
 
+		// Try to get access token from cookie (via document.cookie won't work for httpOnly)
+		// For cross-origin, we need to send token in Authorization header
+		// But since we can't read httpOnly cookies from JS, we'll rely on cookies being sent automatically
+		// If that doesn't work, we'll need to store token in localStorage and send in header
+		
 		const headers = {
 			'Content-Type': 'application/json',
 			...options.headers,
@@ -61,7 +66,7 @@ class ApiClient {
 		let response = await fetch(url, {
 			...options,
 			headers,
-			credentials: 'include', // Include httpOnly cookies
+			credentials: 'include', // Include httpOnly cookies (works for same-origin)
 		})
 
 		// If 401, try to refresh token
