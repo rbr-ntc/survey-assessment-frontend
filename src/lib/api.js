@@ -203,8 +203,19 @@ class ApiClient {
 		
 		// Set tokens in localStorage and cookies
 		if (data.access_token && data.refresh_token) {
+			console.log('[API] Login successful, saving tokens...')
 			await this.setTokens(data.access_token, data.refresh_token)
-			console.log('[API] Tokens saved after login')
+			
+			// Verify tokens were saved
+			if (typeof window !== 'undefined') {
+				const savedAccess = localStorage.getItem('access_token')
+				const savedRefresh = localStorage.getItem('refresh_token')
+				console.log('[API] Tokens verification:', {
+					accessTokenSaved: !!savedAccess,
+					refreshTokenSaved: !!savedRefresh,
+					accessTokenLength: savedAccess?.length || 0,
+				})
+			}
 		} else {
 			console.warn('[API] No tokens in login response:', data)
 		}
