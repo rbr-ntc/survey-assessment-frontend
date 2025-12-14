@@ -22,7 +22,13 @@ export default function LoginPage() {
 			await login(email, password)
 			router.push('/dashboard')
 		} catch (err) {
-			setError(err.message || 'Ошибка входа')
+			// Ensure error is a string, not an object
+			const errorMessage = typeof err.message === 'string' 
+				? err.message 
+				: typeof err === 'string' 
+					? err 
+					: 'Ошибка входа'
+			setError(errorMessage)
 		} finally {
 			setLoading(false)
 		}

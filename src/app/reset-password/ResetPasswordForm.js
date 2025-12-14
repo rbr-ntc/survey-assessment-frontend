@@ -45,10 +45,15 @@ export default function ResetPasswordForm() {
 		setLoading(true)
 
 		try {
-			await resetPassword(email, code, password)
+			await resetPassword(email, code, password, confirmPassword)
 			router.push('/login?passwordReset=true')
 		} catch (err) {
-			setError(err.message || 'Ошибка сброса пароля')
+			const errorMessage = typeof err.message === 'string' 
+				? err.message 
+				: typeof err === 'string' 
+					? err 
+					: 'Ошибка сброса пароля'
+			setError(errorMessage)
 		} finally {
 			setLoading(false)
 		}

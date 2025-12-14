@@ -90,14 +90,21 @@ class ApiClient {
 	}
 
 	// Auth endpoints
-	async register(email, password, name) {
+	async register(email, password, password_confirm, name) {
 		const response = await fetch(`${this.baseURL}/auth/register`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ email, password, name }),
+			body: JSON.stringify({ email, password, password_confirm, name }),
 		})
 		const data = await response.json()
-		if (!response.ok) throw new Error(data.detail || 'Registration failed')
+		if (!response.ok) {
+			// Handle Pydantic validation errors
+			if (Array.isArray(data.detail)) {
+				const errors = data.detail.map(err => err.msg || err.message || JSON.stringify(err)).join(', ')
+				throw new Error(errors)
+			}
+			throw new Error(data.detail || 'Registration failed')
+		}
 		return data
 	}
 
@@ -109,7 +116,14 @@ class ApiClient {
 			body: JSON.stringify({ email, password }),
 		})
 		const data = await response.json()
-		if (!response.ok) throw new Error(data.detail || 'Login failed')
+		if (!response.ok) {
+			// Handle Pydantic validation errors
+			if (Array.isArray(data.detail)) {
+				const errors = data.detail.map(err => err.msg || err.message || JSON.stringify(err)).join(', ')
+				throw new Error(errors)
+			}
+			throw new Error(data.detail || 'Login failed')
+		}
 		
 		// Set tokens in httpOnly cookies via API route
 		if (data.access_token && data.refresh_token) {
@@ -136,7 +150,13 @@ class ApiClient {
 			body: JSON.stringify({ email, code }),
 		})
 		const data = await response.json()
-		if (!response.ok) throw new Error(data.detail || 'Verification failed')
+		if (!response.ok) {
+			if (Array.isArray(data.detail)) {
+				const errors = data.detail.map(err => err.msg || err.message || JSON.stringify(err)).join(', ')
+				throw new Error(errors)
+			}
+			throw new Error(data.detail || 'Verification failed')
+		}
 		return data
 	}
 
@@ -162,14 +182,25 @@ class ApiClient {
 		return data
 	}
 
-	async resetPassword(email, code, newPassword) {
+	async resetPassword(email, code, newPassword, newPasswordConfirm) {
 		const response = await fetch(`${this.baseURL}/auth/reset-password`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ email, code, new_password: newPassword }),
+			body: JSON.stringify({ 
+				email, 
+				code, 
+				new_password: newPassword,
+				new_password_confirm: newPasswordConfirm 
+			}),
 		})
 		const data = await response.json()
-		if (!response.ok) throw new Error(data.detail || 'Password reset failed')
+		if (!response.ok) {
+			if (Array.isArray(data.detail)) {
+				const errors = data.detail.map(err => err.msg || err.message || JSON.stringify(err)).join(', ')
+				throw new Error(errors)
+			}
+			throw new Error(data.detail || 'Password reset failed')
+		}
 		return data
 	}
 

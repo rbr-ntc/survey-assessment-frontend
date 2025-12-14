@@ -55,6 +55,19 @@ export default function DashboardPage() {
 
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					<div className="glass-card p-6">
+						<h2 className="text-xl font-bold text-white mb-4">Тест системного аналитика</h2>
+						<p className="text-white/70 mb-4">
+							Пройдите комплексную оценку навыков системного аналитика
+						</p>
+						<Link
+							href="/"
+							className="glass-button inline-block px-4 py-2 text-sm"
+						>
+							Начать тест
+						</Link>
+					</div>
+
+					<div className="glass-card p-6">
 						<h2 className="text-xl font-bold text-white mb-4">Мои курсы</h2>
 						<p className="text-white/70 mb-4">
 							Начните обучение с выбора курса

@@ -42,13 +42,18 @@ export function AuthProvider({ children }) {
 		}
 	}
 
-	const register = async (email, password, name) => {
+	const register = async (email, password, password_confirm, name) => {
 		try {
 			setError(null)
-			const data = await apiClient.register(email, password, name)
+			const data = await apiClient.register(email, password, password_confirm, name)
 			return data
 		} catch (err) {
-			setError(err.message)
+			const errorMessage = typeof err.message === 'string' 
+				? err.message 
+				: typeof err === 'string' 
+					? err 
+					: 'Ошибка регистрации'
+			setError(errorMessage)
 			throw err
 		}
 	}

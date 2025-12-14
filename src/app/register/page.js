@@ -42,11 +42,22 @@ export default function RegisterPage() {
 		setLoading(true)
 
 		try {
-			await register(formData.email, formData.password, formData.name)
+			await register(
+				formData.email, 
+				formData.password, 
+				formData.confirmPassword, 
+				formData.name
+			)
 			// Redirect to email verification
 			router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`)
 		} catch (err) {
-			setError(err.message || 'Ошибка регистрации')
+			// Ensure error is a string, not an object
+			const errorMessage = typeof err.message === 'string' 
+				? err.message 
+				: typeof err === 'string' 
+					? err 
+					: 'Ошибка регистрации'
+			setError(errorMessage)
 		} finally {
 			setLoading(false)
 		}
