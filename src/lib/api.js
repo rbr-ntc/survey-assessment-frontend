@@ -147,7 +147,7 @@ class ApiClient {
 		const response = await fetch(`${this.baseURL}/auth/verify-email`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ email, code }),
+			body: JSON.stringify({ code }), // Backend expects only code, not email
 		})
 		const data = await response.json()
 		if (!response.ok) {
@@ -161,13 +161,19 @@ class ApiClient {
 	}
 
 	async resendVerificationCode(email) {
-		const response = await fetch(`${this.baseURL}/auth/resend-verification`, {
+		const response = await fetch(`${this.baseURL}/auth/resend-verification-code`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ email }),
 		})
 		const data = await response.json()
-		if (!response.ok) throw new Error(data.detail || 'Failed to resend code')
+		if (!response.ok) {
+			if (Array.isArray(data.detail)) {
+				const errors = data.detail.map(err => err.msg || err.message || JSON.stringify(err)).join(', ')
+				throw new Error(errors)
+			}
+			throw new Error(data.detail || 'Failed to resend code')
+		}
 		return data
 	}
 
