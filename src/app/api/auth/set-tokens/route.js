@@ -14,14 +14,13 @@ export async function POST(request) {
 		const response = NextResponse.json({ success: true })
 
 		// Set httpOnly cookies
-		// Note: For cross-origin (different domains), cookies won't work with httpOnly
-		// We'll need to use Authorization header instead, or use a proxy
+		// For cross-origin (different domains), need sameSite: 'none' with secure: true
 		const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
 		
 		response.cookies.set('access_token', accessToken, {
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: 'lax', // 'lax' works for same-site, 'none' requires secure and proper CORS
+			sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin in production
 			maxAge: 30 * 60, // 30 minutes
 			path: '/',
 		})
@@ -29,7 +28,7 @@ export async function POST(request) {
 		response.cookies.set('refresh_token', refreshToken, {
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: 'lax',
+			sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin in production
 			maxAge: 7 * 24 * 60 * 60, // 7 days
 			path: '/',
 		})

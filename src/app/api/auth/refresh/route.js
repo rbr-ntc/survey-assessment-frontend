@@ -37,19 +37,21 @@ export async function POST() {
 
 		// Update tokens in httpOnly cookies
 		const nextResponse = NextResponse.json({ success: true })
+		
+		const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
 
 		nextResponse.cookies.set('access_token', data.access_token, {
 			httpOnly: true,
-			secure: process.env.NODE_ENV === 'production',
-			sameSite: 'lax',
+			secure: isProduction,
+			sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin
 			maxAge: 30 * 60, // 30 minutes
 			path: '/',
 		})
 
 		nextResponse.cookies.set('refresh_token', data.refresh_token, {
 			httpOnly: true,
-			secure: process.env.NODE_ENV === 'production',
-			sameSite: 'lax',
+			secure: isProduction,
+			sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin
 			maxAge: 7 * 24 * 60 * 60, // 7 days
 			path: '/',
 		})
