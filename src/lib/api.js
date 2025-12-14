@@ -138,20 +138,31 @@ class ApiClient {
 		// If 401, try to refresh token
 		if (response.status === 401) {
 			try {
+				console.log('[API] Got 401, attempting token refresh...')
 				await this.refreshToken()
 				// Get new access token from localStorage
 				const newAccessToken = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
 				if (newAccessToken) {
-					headers['Authorization'] = `Bearer ${newAccessToken}`
+					// Create new headers object with updated token
+					const newHeaders = {
+						...headers,
+						'Authorization': `Bearer ${newAccessToken}`
+					}
+					console.log('[API] Retrying request with new token')
+					// Retry request with new token
+					response = await fetch(url, {
+						...options,
+						headers: newHeaders,
+						credentials: 'include',
+					})
+				} else {
+					console.warn('[API] No access token after refresh, clearing tokens')
+					await this.clearTokens()
+					throw new Error('Session expired')
 				}
-				// Retry request with new token
-				response = await fetch(url, {
-					...options,
-					headers,
-					credentials: 'include',
-				})
 			} catch (error) {
 				// Refresh failed, clear tokens
+				console.error('[API] Token refresh failed:', error)
 				await this.clearTokens()
 				throw new Error('Session expired')
 			}
