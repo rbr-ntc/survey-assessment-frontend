@@ -19,6 +19,9 @@ class ApiClient {
 		if (typeof window !== 'undefined') {
 			localStorage.setItem('access_token', accessToken)
 			localStorage.setItem('refresh_token', refreshToken)
+			console.log('[API] Tokens saved to localStorage')
+		} else {
+			console.warn('[API] Cannot save tokens - not in browser environment')
 		}
 		
 		// Also set in httpOnly cookies via API route (for same-origin fallback)
@@ -30,7 +33,7 @@ class ApiClient {
 			})
 		} catch (error) {
 			// If cookie setting fails, that's okay - we have localStorage
-			console.warn('Failed to set tokens in cookies:', error)
+			console.warn('[API] Failed to set tokens in cookies:', error)
 		}
 	}
 
@@ -107,8 +110,11 @@ class ApiClient {
 	async request(endpoint, options = {}) {
 		const url = `${this.baseURL}${endpoint}`
 
-		// Get access token from localStorage
-		const accessToken = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
+		// Get access token from localStorage (only in browser)
+		let accessToken = null
+		if (typeof window !== 'undefined') {
+			accessToken = localStorage.getItem('access_token')
+		}
 		
 		const headers = {
 			'Content-Type': 'application/json',
@@ -118,6 +124,9 @@ class ApiClient {
 		// Add Authorization header if token exists
 		if (accessToken) {
 			headers['Authorization'] = `Bearer ${accessToken}`
+		} else {
+			// Log for debugging
+			console.warn('[API] No access token found in localStorage for request:', endpoint)
 		}
 
 		let response = await fetch(url, {
@@ -192,9 +201,12 @@ class ApiClient {
 			throw new Error(data.detail || 'Login failed')
 		}
 		
-		// Set tokens in httpOnly cookies via API route
+		// Set tokens in localStorage and cookies
 		if (data.access_token && data.refresh_token) {
 			await this.setTokens(data.access_token, data.refresh_token)
+			console.log('[API] Tokens saved after login')
+		} else {
+			console.warn('[API] No tokens in login response:', data)
 		}
 		
 		return data
