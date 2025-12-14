@@ -15,7 +15,8 @@ export function AuthProvider({ children }) {
 	// Check if user is authenticated on mount
 	useEffect(() => {
 		checkAuth()
-	}, [])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []) // Only run once on mount
 
 	const checkAuth = useCallback(async () => {
 		try {
