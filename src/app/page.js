@@ -10,8 +10,9 @@ export default function Page() {
 	const router = useRouter()
 
 	useEffect(() => {
-		// If not loading and user is not authenticated, redirect to login
-		if (!loading && !isAuthenticated) {
+		// Only redirect if we're sure user is not authenticated (not just loading)
+		// Use a ref or check to prevent multiple redirects
+		if (loading === false && !isAuthenticated) {
 			router.push('/login')
 		}
 	}, [loading, isAuthenticated, router])

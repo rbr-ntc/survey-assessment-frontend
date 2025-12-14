@@ -2,7 +2,7 @@
 
 import { apiClient } from '@/lib/api'
 import { useRouter } from 'next/navigation'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 const AuthContext = createContext()
 
@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
 		checkAuth()
 	}, [])
 
-	const checkAuth = async () => {
+	const checkAuth = useCallback(async () => {
 		try {
 			// Try to get current user - if fails, user is not authenticated
 			const userData = await apiClient.getCurrentUser()
@@ -34,9 +34,9 @@ export function AuthProvider({ children }) {
 		} finally {
 			setLoading(false)
 		}
-	}
+	}, [])
 
-	const login = async (email, password) => {
+	const login = useCallback(async (email, password) => {
 		try {
 			setError(null)
 			const data = await apiClient.login(email, password)
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
 			setError(err.message)
 			throw err
 		}
-	}
+	}, [checkAuth])
 
 	const register = async (email, password, password_confirm, name) => {
 		try {
@@ -129,20 +129,24 @@ export function AuthProvider({ children }) {
 		}
 	}
 
-	const value = {
-		user,
-		loading,
-		error,
-		login,
-		register,
-		logout,
-		verifyEmail,
-		resendVerificationCode,
-		forgotPassword,
-		resetPassword,
-		checkAuth,
-		isAuthenticated: !!user,
-	}
+	// Memoize value to prevent unnecessary re-renders
+	const value = useMemo(
+		() => ({
+			user,
+			loading,
+			error,
+			login,
+			register,
+			logout,
+			verifyEmail,
+			resendVerificationCode,
+			forgotPassword,
+			resetPassword,
+			checkAuth,
+			isAuthenticated: !!user,
+		}),
+		[user, loading, error, login, checkAuth, router]
+	)
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
