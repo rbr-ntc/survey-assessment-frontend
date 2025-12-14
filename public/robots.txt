@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Главная страница - индексируем
+Allow: /$
+
+# Страницы результатов - НЕ индексируем (личные данные)
+Disallow: /result/
+
+# API - НЕ индексируем
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://evaly.ru/sitemap.xml
+
+# Crawl-delay для уважительного отношения к серверу
+Crawl-delay: 1
