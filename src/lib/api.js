@@ -12,34 +12,88 @@ class ApiClient {
 	}
 
 	/**
-	 * Set tokens in httpOnly cookies (via API route)
+	 * Set tokens in localStorage (for cross-origin support) and cookies (fallback)
 	 */
 	async setTokens(accessToken, refreshToken) {
-		await fetch('/api/auth/set-tokens', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ accessToken, refreshToken }),
-		})
+		// Store tokens in localStorage for cross-origin support
+		if (typeof window !== 'undefined') {
+			localStorage.setItem('access_token', accessToken)
+			localStorage.setItem('refresh_token', refreshToken)
+		}
+		
+		// Also set in httpOnly cookies via API route (for same-origin fallback)
+		try {
+			await fetch('/api/auth/set-tokens', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ accessToken, refreshToken }),
+			})
+		} catch (error) {
+			// If cookie setting fails, that's okay - we have localStorage
+			console.warn('Failed to set tokens in cookies:', error)
+		}
 	}
 
 	/**
-	 * Clear tokens (via API route)
+	 * Clear tokens from localStorage and cookies
 	 */
 	async clearTokens() {
-		await fetch('/api/auth/clear-tokens', { method: 'POST' })
+		// Clear tokens from localStorage
+		if (typeof window !== 'undefined') {
+			localStorage.removeItem('access_token')
+			localStorage.removeItem('refresh_token')
+		}
+		
+		// Also clear httpOnly cookies via API route
+		try {
+			await fetch('/api/auth/clear-tokens', { method: 'POST' })
+		} catch (error) {
+			// If cookie clearing fails, that's okay
+			console.warn('Failed to clear tokens from cookies:', error)
+		}
 	}
 
 	/**
-	 * Refresh access token (uses API route that reads httpOnly refresh_token cookie)
+	 * Refresh access token (uses localStorage refresh_token or API route)
 	 */
 	async refreshToken() {
 		try {
-			const response = await fetch('/api/auth/refresh', {
-				method: 'POST',
-				credentials: 'include',
-			})
-			if (!response.ok) throw new Error('Token refresh failed')
-			return await response.json()
+			// Try to get refresh token from localStorage first
+			const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null
+			
+			if (refreshToken) {
+				// Use localStorage token directly
+				const response = await fetch(`${this.baseURL}/auth/refresh`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ refresh_token: refreshToken }),
+				})
+				
+				if (!response.ok) throw new Error('Token refresh failed')
+				const data = await response.json()
+				
+				// Update tokens
+				if (data.access_token && data.refresh_token) {
+					await this.setTokens(data.access_token, data.refresh_token)
+				}
+				
+				return data
+			} else {
+				// Fallback to API route (reads from httpOnly cookie)
+				const response = await fetch('/api/auth/refresh', {
+					method: 'POST',
+					credentials: 'include',
+				})
+				if (!response.ok) throw new Error('Token refresh failed')
+				const data = await response.json()
+				
+				// Update tokens
+				if (data.access_token && data.refresh_token) {
+					await this.setTokens(data.access_token, data.refresh_token)
+				}
+				
+				return data
+			}
 		} catch (error) {
 			await this.clearTokens()
 			throw error
@@ -48,32 +102,40 @@ class ApiClient {
 
 	/**
 	 * Make authenticated request with automatic token refresh
-	 * Uses httpOnly cookies for tokens, so we rely on credentials: 'include'
+	 * Uses localStorage for tokens and sends in Authorization header (for cross-origin support)
 	 */
 	async request(endpoint, options = {}) {
 		const url = `${this.baseURL}${endpoint}`
 
-		// Try to get access token from cookie (via document.cookie won't work for httpOnly)
-		// For cross-origin, we need to send token in Authorization header
-		// But since we can't read httpOnly cookies from JS, we'll rely on cookies being sent automatically
-		// If that doesn't work, we'll need to store token in localStorage and send in header
+		// Get access token from localStorage
+		const accessToken = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
 		
 		const headers = {
 			'Content-Type': 'application/json',
 			...options.headers,
 		}
 
+		// Add Authorization header if token exists
+		if (accessToken) {
+			headers['Authorization'] = `Bearer ${accessToken}`
+		}
+
 		let response = await fetch(url, {
 			...options,
 			headers,
-			credentials: 'include', // Include httpOnly cookies (works for same-origin)
+			credentials: 'include', // Still include cookies for refresh token
 		})
 
 		// If 401, try to refresh token
 		if (response.status === 401) {
 			try {
 				await this.refreshToken()
-				// Retry request (cookies will be sent automatically)
+				// Get new access token from localStorage
+				const newAccessToken = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
+				if (newAccessToken) {
+					headers['Authorization'] = `Bearer ${newAccessToken}`
+				}
+				// Retry request with new token
 				response = await fetch(url, {
 					...options,
 					headers,
