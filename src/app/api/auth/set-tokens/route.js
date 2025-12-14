@@ -14,18 +14,21 @@ export async function POST(request) {
 		const response = NextResponse.json({ success: true })
 
 		// Set httpOnly cookies
+		// Use secure: true in production (HTTPS required)
+		const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
+		
 		response.cookies.set('access_token', accessToken, {
 			httpOnly: true,
-			secure: process.env.NODE_ENV === 'production',
-			sameSite: 'lax',
+			secure: isProduction,
+			sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin in production
 			maxAge: 30 * 60, // 30 minutes
 			path: '/',
 		})
 
 		response.cookies.set('refresh_token', refreshToken, {
 			httpOnly: true,
-			secure: process.env.NODE_ENV === 'production',
-			sameSite: 'lax',
+			secure: isProduction,
+			sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin in production
 			maxAge: 7 * 24 * 60 * 60, // 7 days
 			path: '/',
 		})
