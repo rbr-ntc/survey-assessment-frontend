@@ -51,7 +51,7 @@ export function AuthProvider({ children }) {
 		}
 	}, [checkAuth])
 
-	const register = async (email, password, password_confirm, name) => {
+	const register = useCallback(async (email, password, password_confirm, name) => {
 		try {
 			setError(null)
 			const data = await apiClient.register(
@@ -71,9 +71,9 @@ export function AuthProvider({ children }) {
 			setError(errorMessage)
 			throw err
 		}
-	}
+	}, [])
 
-	const logout = async () => {
+	const logout = useCallback(async () => {
 		try {
 			await apiClient.logout()
 			setUser(null)
@@ -84,9 +84,9 @@ export function AuthProvider({ children }) {
 			setUser(null)
 			router.push('/login')
 		}
-	}
+	}, [router])
 
-	const verifyEmail = async (email, code) => {
+	const verifyEmail = useCallback(async (email, code) => {
 		try {
 			setError(null)
 			const data = await apiClient.verifyEmail(email, code)
@@ -96,9 +96,9 @@ export function AuthProvider({ children }) {
 			setError(err.message)
 			throw err
 		}
-	}
+	}, [checkAuth])
 
-	const resendVerificationCode = async email => {
+	const resendVerificationCode = useCallback(async email => {
 		try {
 			setError(null)
 			return await apiClient.resendVerificationCode(email)
@@ -106,9 +106,9 @@ export function AuthProvider({ children }) {
 			setError(err.message)
 			throw err
 		}
-	}
+	}, [])
 
-	const forgotPassword = async email => {
+	const forgotPassword = useCallback(async email => {
 		try {
 			setError(null)
 			return await apiClient.forgotPassword(email)
@@ -116,9 +116,9 @@ export function AuthProvider({ children }) {
 			setError(err.message)
 			throw err
 		}
-	}
+	}, [])
 
-	const resetPassword = async (email, code, newPassword) => {
+	const resetPassword = useCallback(async (email, code, newPassword) => {
 		try {
 			setError(null)
 			const data = await apiClient.resetPassword(email, code, newPassword)
@@ -127,7 +127,7 @@ export function AuthProvider({ children }) {
 			setError(err.message)
 			throw err
 		}
-	}
+	}, [])
 
 	// Memoize value to prevent unnecessary re-renders
 	const value = useMemo(
@@ -145,7 +145,7 @@ export function AuthProvider({ children }) {
 			checkAuth,
 			isAuthenticated: !!user,
 		}),
-		[user, loading, error, login, checkAuth, router]
+		[user, loading, error, login, register, logout, verifyEmail, resendVerificationCode, forgotPassword, resetPassword, checkAuth]
 	)
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
