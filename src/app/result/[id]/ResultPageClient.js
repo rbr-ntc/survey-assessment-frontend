@@ -1,8 +1,10 @@
 'use client'
 import { use, useCallback, useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import ResultsScreen from '../../../components/ResultsScreen'
 
 export default function ResultPageClient({ params }) {
+	const router = useRouter()
 	const { id } = use(params)
 	const [result, setResult] = useState(null)
 	const [loading, setLoading] = useState(true)
@@ -140,7 +142,7 @@ ${
 	}
 
 	const handleRestart = () => {
-		window.location.href = '/'
+		router.push('/test')
 	}
 
 	return (

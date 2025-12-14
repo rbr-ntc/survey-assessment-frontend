@@ -1,5 +1,6 @@
 'use client'
 import { createContext, useContext, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import categories from '../lib/categories'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -8,6 +9,7 @@ const API_KEY = process.env.NEXT_PUBLIC_API_KEY || 'MY_SUPER_SECRET_API_KEY'
 const AssessmentContext = createContext()
 
 export const AssessmentProvider = ({ children }) => {
+	const router = useRouter()
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
 	const [answers, setAnswers] = useState({})
 	const [results, setResults] = useState(null)
@@ -223,7 +225,7 @@ export const AssessmentProvider = ({ children }) => {
 			if (!res.ok) throw new Error('Ошибка запуска быстрого теста')
 			const data = await res.json()
 			// Перенаправляем на страницу результатов
-			window.location.href = `/result/${data.test_id}`
+			router.push(`/result/${data.test_id}`)
 			return data
 		} catch (e) {
 			setError(e.message)

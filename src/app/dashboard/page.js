@@ -66,12 +66,12 @@ export default function DashboardPage() {
 						<p className='text-white/70 mb-4'>
 							Пройдите комплексную оценку навыков системного аналитика
 						</p>
-						<Link
-							href='/'
-							className='glass-button inline-block px-4 py-2 text-sm'
-						>
-							Начать тест
-						</Link>
+					<Link
+						href='/test'
+						className='glass-button inline-block px-4 py-2 text-sm'
+					>
+						Начать тест
+					</Link>
 					</div>
 
 					<div className='glass-card p-6'>
