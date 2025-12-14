@@ -26,10 +26,8 @@ export const AssessmentProvider = ({ children }) => {
 	const [questions, setQuestions] = useState([])
 	const [isQuestionsLoading, setIsQuestionsLoading] = useState(false)
 
-	// Автоматически загружаем вопросы при инициализации компонента
-	useEffect(() => {
-		fetchQuestions()
-	}, []) // Пустой массив зависимостей - выполняется только один раз
+	// НЕ загружаем вопросы автоматически - только по запросу через handleStartAssessment
+	// Это предотвращает загрузку для неавторизованных пользователей
 
 	// Загрузка вопросов с backend
 	const fetchQuestions = async () => {

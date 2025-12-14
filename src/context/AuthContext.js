@@ -19,12 +19,14 @@ export function AuthProvider({ children }) {
 
 	const checkAuth = async () => {
 		try {
+			// Try to get current user - if fails, user is not authenticated
 			const userData = await apiClient.getCurrentUser()
 			setUser(userData)
 			setError(null)
 		} catch (err) {
+			// User is not authenticated - this is normal, don't show error
 			setUser(null)
-			setError(null) // Don't show error on initial check
+			setError(null)
 		} finally {
 			setLoading(false)
 		}

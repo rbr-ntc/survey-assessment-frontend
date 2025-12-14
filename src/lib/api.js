@@ -205,7 +205,17 @@ class ApiClient {
 	}
 
 	async getCurrentUser() {
-		return this.request('/auth/me')
+		// Make request - if fails with 401, user is not authenticated
+		// This is expected for unauthenticated users, so we handle it gracefully
+		try {
+			return await this.request('/auth/me')
+		} catch (error) {
+			// If it's a 401 or "Session expired", user is not authenticated
+			if (error.message.includes('401') || error.message.includes('Session expired') || error.message.includes('Not authenticated')) {
+				throw new Error('Not authenticated')
+			}
+			throw error
+		}
 	}
 }
 
