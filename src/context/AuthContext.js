@@ -36,6 +36,8 @@ export function AuthProvider({ children }) {
 		try {
 			setError(null)
 			const data = await apiClient.login(email, password)
+			// Wait a bit for cookies to be set before checking auth
+			await new Promise(resolve => setTimeout(resolve, 100))
 			await checkAuth() // Refresh user data
 			return data
 		} catch (err) {
