@@ -26,7 +26,14 @@ export default function DashboardPage() {
 	}
 
 	if (!user) {
-		return null
+		// Show loading or redirect message instead of nothing
+		return (
+			<div className="auth-bg flex items-center justify-center min-h-screen">
+				<div className="glass-card p-8">
+					<p className="text-white text-center">Перенаправление...</p>
+				</div>
+			</div>
+		)
 	}
 
 	return (

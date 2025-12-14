@@ -25,6 +25,10 @@ export function AuthProvider({ children }) {
 			setError(null)
 		} catch (err) {
 			// User is not authenticated - this is normal, don't show error
+			// Only log if it's not a "Not authenticated" error
+			if (!err.message || !err.message.includes('Not authenticated')) {
+				console.error('Auth check error:', err)
+			}
 			setUser(null)
 			setError(null)
 		} finally {
