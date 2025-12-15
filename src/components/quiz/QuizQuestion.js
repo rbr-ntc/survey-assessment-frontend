@@ -29,6 +29,7 @@ export default function QuizQuestion() {
 	}
 
 	const handleAnswer = (value) => {
+		console.log('Answer clicked:', value, 'Question ID:', currentQuestion.id)
 		submitAnswer(currentQuestion.id, value)
 	}
 
@@ -67,39 +68,43 @@ export default function QuizQuestion() {
 
 					{/* Options */}
 					<div className="space-y-3">
-						{currentQuestion.options?.map((option) => (
-							<button
-								key={option.value}
-								type="button"
-								onClick={(e) => {
-									e.preventDefault()
-									e.stopPropagation()
-									handleAnswer(option.value)
-								}}
-								className={`w-full text-left glass-card p-4 transition-all cursor-pointer ${
-									selectedAnswer === option.value
-										? 'bg-white/20 border-2 border-white/40'
-										: 'bg-white/5 hover:bg-white/10 border border-white/10'
-								}`}
-							>
-								<div className="flex items-start">
-									<div className="flex-shrink-0 mt-0.5">
-										<div
-											className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center transition-all ${
-												selectedAnswer === option.value
-													? 'border-white bg-white/30'
-													: 'border-white/50 bg-transparent'
-											}`}
-										>
-											{selectedAnswer === option.value && (
-												<div className="w-3 h-3 rounded-full bg-white" />
-											)}
+						{currentQuestion.options?.map((option) => {
+							const isSelected = selectedAnswer === option.value
+							return (
+								<button
+									key={option.value}
+									type="button"
+									onClick={() => {
+										console.log('[QuizQuestion] Answer clicked:', option.value)
+										handleAnswer(option.value)
+									}}
+									className={`w-full text-left p-4 rounded-xl transition-all cursor-pointer select-none ${
+										isSelected
+											? 'bg-white/20 border-2 border-white/40 shadow-lg'
+											: 'bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20'
+									} backdrop-blur-sm`}
+								>
+									<div className="flex items-start gap-4">
+										{/* Radio button */}
+										<div className="flex-shrink-0 mt-0.5">
+											<div
+												className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+													isSelected
+														? 'border-white bg-white/30 shadow-inner'
+														: 'border-white/50 bg-transparent'
+												}`}
+											>
+												{isSelected && (
+													<div className="w-3 h-3 rounded-full bg-white shadow-sm" />
+												)}
+											</div>
 										</div>
+										{/* Option text */}
+										<span className="text-white flex-1 leading-relaxed">{option.text}</span>
 									</div>
-									<span className="text-white flex-1">{option.text}</span>
-								</div>
-							</button>
-						))}
+								</button>
+							)
+						})}
 					</div>
 				</div>
 
@@ -134,4 +139,5 @@ export default function QuizQuestion() {
 		</div>
 	)
 }
+
 
