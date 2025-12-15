@@ -1,6 +1,8 @@
 'use client'
 
 import { useQuiz } from '@/context/QuizContext'
+import categories from '@/lib/categories'
+import QuestionTypeBadge from './QuestionTypeBadge'
 
 export default function QuizQuestion() {
 	const {
@@ -43,89 +45,118 @@ export default function QuizQuestion() {
 
 	const selectedAnswer = answers[currentQuestion.id]
 
+	const category = currentQuestion.category ? categories[currentQuestion.category] : null
+
 	return (
-		<div className="auth-bg min-h-screen p-4">
-			<div className="max-w-4xl mx-auto">
-				{/* Progress bar */}
-				<div className="glass-card p-4 mb-6">
-					<div className="flex items-center justify-between text-white mb-2">
-						<span className="text-sm">
-							Вопрос {currentQuestionIndex + 1} из {questions.length}
+		<div className="auth-bg min-h-screen p-4 md:py-8">
+			<div className="max-w-3xl mx-auto">
+				{/* Header / Progress */}
+				<div className="mb-6 flex flex-col gap-4">
+					<div className="flex items-center justify-between text-sm font-medium text-white/70">
+						{category && (
+							<span className="flex items-center gap-2">
+								<span className="text-lg" aria-hidden="true">{category.icon}</span>
+								<span className="text-white">{category.name}</span>
+							</span>
+						)}
+						{!category && <span></span>}
+						<span className="text-white">
+							{currentQuestionIndex + 1} / {questions.length}
 						</span>
-						<span className="text-sm">{Math.round(progress)}%</span>
 					</div>
-					<div className="w-full bg-white/10 rounded-full h-2">
+					<div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
 						<div
-							className="bg-white/30 h-2 rounded-full transition-all duration-300"
+							className="h-full rounded-full bg-white/30 transition-all duration-500 ease-out"
 							style={{ width: `${progress}%` }}
 						/>
 					</div>
 				</div>
 
-				{/* Question */}
-				<div className="glass-card p-8 mb-6">
-					<h2 className="text-2xl font-bold text-white mb-6">{currentQuestion.question}</h2>
+				{/* Question Card */}
+				<div className="glass-card p-6 md:p-10 mb-6 transition-all">
+					{/* Question Type Badge */}
+					{currentQuestion.type && (
+						<div className="mb-4">
+							<QuestionTypeBadge type={currentQuestion.type} />
+						</div>
+					)}
+
+					{/* Question Text */}
+					<h2 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-8">
+						{currentQuestion.question}
+					</h2>
 
 					{/* Options */}
-					<div className="space-y-3" onClick={(e) => e.stopPropagation()}>
+					<div className="flex flex-col gap-3">
 						{currentQuestion.options?.map((option) => {
 							const isSelected = selectedAnswer === option.value
 							return (
-								<button
+								<label
 									key={option.value}
-									type="button"
-									onClick={(e) => {
-										e.preventDefault()
-										e.stopPropagation()
-										console.log('[QuizQuestion] Answer clicked:', option.value, 'Question:', currentQuestion.id)
-										handleAnswer(option.value)
-									}}
-									onMouseDown={(e) => {
-										e.preventDefault()
-										e.stopPropagation()
-									}}
-									className={`w-full text-left p-4 rounded-xl transition-all cursor-pointer select-none active:scale-[0.98] ${
-										isSelected
-											? 'bg-white/20 border-2 border-white/40 shadow-lg'
-											: 'bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20'
-									} backdrop-blur-sm`}
-									style={{ WebkitTapHighlightColor: 'transparent' }}
+									className={`
+										group relative flex items-start gap-4 p-5 rounded-xl border-2 cursor-pointer transition-all duration-200
+										${
+											isSelected
+												? 'border-white/60 bg-white/20 ring-2 ring-white/30 shadow-lg z-10'
+												: 'border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10'
+										}
+									`}
 								>
-									<div className="flex items-start gap-4 pointer-events-none">
-										{/* Radio button */}
-										<div className="flex-shrink-0 mt-0.5">
-											<div
-												className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-													isSelected
-														? 'border-white bg-white/30 shadow-inner'
-														: 'border-white/50 bg-transparent'
-												}`}
-											>
-												{isSelected && (
-													<div className="w-3 h-3 rounded-full bg-white shadow-sm" />
-												)}
-											</div>
-										</div>
-										{/* Option text */}
-										<span className="text-white flex-1 leading-relaxed">{option.text}</span>
-									</div>
-								</button>
+									<input
+										type="radio"
+										name={currentQuestion.id}
+										value={option.value}
+										checked={isSelected}
+										onChange={() => {
+											console.log('[QuizQuestion] Answer selected:', option.value)
+											handleAnswer(option.value)
+										}}
+										className="sr-only"
+									/>
+
+									{/* Radio Circle */}
+									<span
+										className={`
+											flex items-center justify-center w-5 h-5 mt-0.5 rounded-full border transition-all shrink-0
+											${
+												isSelected
+													? 'border-white bg-white/40'
+													: 'border-white/40 bg-white/5 group-hover:border-white/60'
+											}
+										`}
+									>
+										<span
+											className="w-2.5 h-2.5 rounded-full bg-white opacity-0 transition-opacity duration-200"
+											style={{ opacity: isSelected ? 1 : 0 }}
+										/>
+									</span>
+
+									{/* Option text */}
+									<span
+										className={`text-base leading-relaxed transition-colors flex-1 ${
+											isSelected
+												? 'text-white font-medium'
+												: 'text-white/90'
+										}`}
+									>
+										{option.text}
+									</span>
+								</label>
 							)
 						})}
 					</div>
 				</div>
 
-				{/* Navigation */}
-				<div className="flex justify-between gap-4">
+				{/* Footer Navigation */}
+				<div className="flex items-center justify-between pt-6 border-t border-white/10">
 					<button
 						type="button"
 						onClick={(e) => {
 							e.preventDefault()
-							e.stopPropagation()
 							prevQuestion()
 						}}
 						disabled={isFirstQuestion}
-						className="glass-button px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+						className="px-6 py-2.5 text-white/70 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed font-medium"
 					>
 						Назад
 					</button>
@@ -133,11 +164,18 @@ export default function QuizQuestion() {
 						type="button"
 						onClick={(e) => {
 							e.preventDefault()
-							e.stopPropagation()
 							handleNext()
 						}}
 						disabled={!selectedAnswer || isLoading}
-						className="glass-button px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+						className={`
+							px-8 py-3 rounded-xl font-semibold text-white transition-all shadow-lg
+							${
+								isLastQuestion
+									? 'bg-white/20 hover:bg-white/30 shadow-white/20'
+									: 'bg-white/15 hover:bg-white/25 shadow-white/10'
+							}
+							disabled:opacity-50 disabled:cursor-not-allowed
+						`}
 					>
 						{isLoading ? 'Отправка...' : isLastQuestion ? 'Завершить тест' : 'Далее'}
 					</button>
