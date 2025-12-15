@@ -330,6 +330,42 @@ class ApiClient {
 			throw error
 		}
 	}
+
+	// Quiz/Assessment endpoints (universal test system)
+	async getQuiz(quizId) {
+		// Normalize quizId (remove 'quiz:' prefix if present for API call)
+		const normalizedQuizId = quizId?.replace('quiz:', '') || quizId
+		return await this.request(`/quizzes/${normalizedQuizId}`)
+	}
+
+	async getQuizQuestions(quizId) {
+		// Normalize quizId (remove 'quiz:' prefix if present for API call)
+		const normalizedQuizId = quizId?.replace('quiz:', '') || quizId
+		return await this.request(`/quizzes/${normalizedQuizId}/questions`)
+	}
+
+	async startQuiz(quizId) {
+		// Normalize quizId (remove 'quiz:' prefix if present for API call)
+		const normalizedQuizId = quizId?.replace('quiz:', '') || quizId
+		return await this.request(`/quizzes/${normalizedQuizId}/start`, {
+			method: 'POST',
+		})
+	}
+
+	async submitQuiz(quizId, attemptId, answers) {
+		// Normalize quizId (remove 'quiz:' prefix if present for API call)
+		const normalizedQuizId = quizId?.replace('quiz:', '') || quizId
+		return await this.request(`/quizzes/${normalizedQuizId}/attempts/${attemptId}/submit`, {
+			method: 'POST',
+			body: JSON.stringify({ answers }),
+		})
+	}
+
+	async getQuizAttempt(quizId, attemptId) {
+		// Normalize quizId (remove 'quiz:' prefix if present for API call)
+		const normalizedQuizId = quizId?.replace('quiz:', '') || quizId
+		return await this.request(`/quizzes/${normalizedQuizId}/attempts/${attemptId}`)
+	}
 }
 
 export const apiClient = new ApiClient()

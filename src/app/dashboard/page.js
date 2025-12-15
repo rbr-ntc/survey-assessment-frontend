@@ -67,7 +67,7 @@ export default function DashboardPage() {
 							Пройдите комплексную оценку навыков системного аналитика
 						</p>
 					<Link
-						href='/test'
+						href='/test/system-analyst-assessment'
 						className='glass-button inline-block px-4 py-2 text-sm'
 					>
 						Начать тест
