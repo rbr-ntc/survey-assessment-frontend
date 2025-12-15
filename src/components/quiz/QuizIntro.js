@@ -125,9 +125,15 @@ export default function QuizIntro() {
 							{['expert', 'intermediate', 'beginner', 'random'].map(type => (
 								<button
 									key={type}
-									onClick={() => handleQuickTest(type)}
+									type='button'
+									onClick={e => {
+										e.preventDefault()
+										e.stopPropagation()
+										console.log('[QuizIntro] Quick test clicked:', type)
+										handleQuickTest(type)
+									}}
 									disabled={isQuickTestLoading}
-									className='px-3 py-2 text-xs font-medium rounded-lg bg-white/10 text-white/80 hover:bg-white/20 transition-colors disabled:opacity-50'
+									className='px-3 py-2 text-xs font-medium rounded-lg bg-white/10 text-white/80 hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
 								>
 									{type.charAt(0).toUpperCase() + type.slice(1)}
 								</button>

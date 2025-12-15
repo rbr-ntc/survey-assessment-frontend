@@ -52,21 +52,23 @@ export default function QuizQuestion() {
 			<div className="max-w-3xl mx-auto">
 				{/* Header / Progress */}
 				<div className="mb-6 flex flex-col gap-4">
-					<div className="flex items-center justify-between text-sm font-medium text-white/70">
+					<div className="flex items-center justify-between">
 						{category && (
-							<span className="flex items-center gap-2">
+							<div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
 								<span className="text-lg" aria-hidden="true">{category.icon}</span>
-								<span className="text-white">{category.name}</span>
-							</span>
+								<span className="text-sm font-medium text-white/90">{category.name}</span>
+							</div>
 						)}
-						{!category && <span></span>}
-						<span className="text-white">
-							{currentQuestionIndex + 1} / {questions.length}
-						</span>
+						{!category && <div></div>}
+						<div className="px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
+							<span className="text-sm font-medium text-white/90">
+								{currentQuestionIndex + 1} / {questions.length}
+							</span>
+						</div>
 					</div>
-					<div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+					<div className="w-full bg-white/10 rounded-full h-2 overflow-hidden backdrop-blur-sm">
 						<div
-							className="h-full rounded-full bg-white/30 transition-all duration-500 ease-out"
+							className="h-full rounded-full bg-white/40 transition-all duration-500 ease-out shadow-sm"
 							style={{ width: `${progress}%` }}
 						/>
 					</div>
@@ -76,7 +78,7 @@ export default function QuizQuestion() {
 				<div className="glass-card p-6 md:p-10 mb-6 transition-all">
 					{/* Question Type Badge */}
 					{currentQuestion.type && (
-						<div className="mb-4">
+						<div className="mb-5">
 							<QuestionTypeBadge type={currentQuestion.type} />
 						</div>
 					)}
