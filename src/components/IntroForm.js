@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { useAssessment } from './AssessmentContext'
 import TestRulesModal from './TestRulesModal'
 import { Button } from '@/components/ui/button'
@@ -23,6 +24,7 @@ const IntroForm = ({ questionsCount = 0 }) => {
 		email: '',
 		experience: '',
 	})
+	const [errors, setErrors] = useState({})
 	const [isLoading, setIsLoading] = useState(false)
 	const [isQuickTestLoading, setIsQuickTestLoading] = useState(false)
 	const [showRulesModal, setShowRulesModal] = useState(false)
@@ -37,16 +39,33 @@ const IntroForm = ({ questionsCount = 0 }) => {
 			...prev,
 			[name]: value,
 		}))
+		// Clear error when user starts typing
+		if (errors[name]) {
+			setErrors(prev => ({
+				...prev,
+				[name]: null
+			}))
+		}
 	}
 
 	const handleSubmit = async e => {
 		e.preventDefault()
-		if (
-			!formData.name.trim() ||
-			!formData.email.trim() ||
-			!formData.experience.trim()
-		) {
-			alert('Пожалуйста, заполните все поля')
+		const newErrors = {}
+
+		if (!formData.name.trim()) {
+			newErrors.name = 'Пожалуйста, введите ваше имя'
+		}
+		if (!formData.email.trim()) {
+			newErrors.email = 'Пожалуйста, введите email'
+		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+			newErrors.email = 'Пожалуйста, введите корректный email'
+		}
+		if (!formData.experience.trim()) {
+			newErrors.experience = 'Пожалуйста, выберите опыт работы'
+		}
+
+		if (Object.keys(newErrors).length > 0) {
+			setErrors(newErrors)
 			return
 		}
 
@@ -118,14 +137,20 @@ const IntroForm = ({ questionsCount = 0 }) => {
 							</label>
 							<input
 								id='name'
-								className='w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-400'
+								className={`w-full px-4 py-3 rounded-xl border ${errors.name ? 'border-red-500 bg-red-50' : 'border-slate-200 bg-slate-50/50'} text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-400`}
 								type='text'
 								name='name'
 								placeholder='Иван Иванов'
 								value={formData.name}
 								onChange={handleInputChange}
-								required
+								aria-invalid={!!errors.name}
+								aria-describedby={errors.name ? 'name-error' : undefined}
 							/>
+							{errors.name && (
+								<p id="name-error" className="text-red-500 text-xs mt-1 ml-1" role="alert">
+									{errors.name}
+								</p>
+							)}
 						</div>
 
 						<div className='space-y-1.5'>
@@ -137,14 +162,20 @@ const IntroForm = ({ questionsCount = 0 }) => {
 							</label>
 							<input
 								id='email'
-								className='w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-400'
+								className={`w-full px-4 py-3 rounded-xl border ${errors.email ? 'border-red-500 bg-red-50' : 'border-slate-200 bg-slate-50/50'} text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-400`}
 								type='email'
 								name='email'
 								placeholder='ivan@example.com'
 								value={formData.email}
 								onChange={handleInputChange}
-								required
+								aria-invalid={!!errors.email}
+								aria-describedby={errors.email ? 'email-error' : undefined}
 							/>
+							{errors.email && (
+								<p id="email-error" className="text-red-500 text-xs mt-1 ml-1" role="alert">
+									{errors.email}
+								</p>
+							)}
 						</div>
 
 						<div className='space-y-1.5'>
@@ -157,11 +188,12 @@ const IntroForm = ({ questionsCount = 0 }) => {
 							<div className="relative">
 								<select
 									id='experience'
-									className='w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all appearance-none cursor-pointer'
+									className={`w-full px-4 py-3 rounded-xl border ${errors.experience ? 'border-red-500 bg-red-50' : 'border-slate-200 bg-slate-50/50'} text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all appearance-none cursor-pointer`}
 									name='experience'
 									value={formData.experience}
 									onChange={handleInputChange}
-									required
+									aria-invalid={!!errors.experience}
+									aria-describedby={errors.experience ? 'experience-error' : undefined}
 								>
 									<option value=''>Выберите опыт...</option>
 									{experienceOptions.map(opt => (
@@ -176,6 +208,11 @@ const IntroForm = ({ questionsCount = 0 }) => {
 									</svg>
 								</div>
 							</div>
+							{errors.experience && (
+								<p id="experience-error" className="text-red-500 text-xs mt-1 ml-1" role="alert">
+									{errors.experience}
+								</p>
+							)}
 						</div>
 					</div>
 
@@ -185,11 +222,14 @@ const IntroForm = ({ questionsCount = 0 }) => {
 						className='w-full py-6 text-base rounded-xl font-semibold shadow-xl shadow-indigo-500/20 mt-2'
 						disabled={isLoading || isQuestionsLoading}
 					>
-						{isLoading
-							? 'Запуск...'
-							: isQuestionsLoading
-							? 'Загрузка...'
-							: 'Начать тестирование'}
+						{isLoading || isQuestionsLoading ? (
+							<>
+								<Loader2 className="animate-spin" />
+								{isLoading ? 'Запуск...' : 'Загрузка...'}
+							</>
+						) : (
+							'Начать тестирование'
+						)}
 					</Button>
 				</form>
 
