@@ -117,7 +117,7 @@ export default function QuizIntro() {
 
 				{/* Quick Test Dev Tools */}
 				{isQuickTestEnabled && (
-					<div className='border-t border-white/10 pt-6 mt-6'>
+					<div className='border-t border-white/10 pt-6 mt-6 relative z-10'>
 						<h3 className='text-xs font-semibold text-center mb-3 text-white/50 uppercase tracking-widest'>
 							Dev Mode
 						</h3>
@@ -126,16 +126,23 @@ export default function QuizIntro() {
 								<button
 									key={type}
 									type='button'
-									onClick={e => {
+									onClick={async e => {
 										e.preventDefault()
 										e.stopPropagation()
-										console.log('[QuizIntro] Quick test clicked:', type)
-										handleQuickTest(type)
+										console.log('[QuizIntro] Quick test button clicked:', type)
+										await handleQuickTest(type)
+									}}
+									onMouseDown={e => {
+										e.preventDefault()
+										e.stopPropagation()
 									}}
 									disabled={isQuickTestLoading}
-									className='px-3 py-2 text-xs font-medium rounded-lg bg-white/10 text-white/80 hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
+									className='px-3 py-2 text-xs font-medium rounded-lg bg-white/10 text-white/80 hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer relative z-10'
+									style={{ WebkitTapHighlightColor: 'transparent' }}
 								>
-									{type.charAt(0).toUpperCase() + type.slice(1)}
+									{isQuickTestLoading
+										? '...'
+										: type.charAt(0).toUpperCase() + type.slice(1)}
 								</button>
 							))}
 						</div>

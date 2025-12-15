@@ -1,11 +1,13 @@
 'use client'
 
 import { apiClient } from '@/lib/api'
+import { useRouter } from 'next/navigation'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 const QuizContext = createContext()
 
 export function QuizProvider({ children }) {
+	const router = useRouter()
 	const [quiz, setQuiz] = useState(null)
 	const [questions, setQuestions] = useState([])
 	const [attempt, setAttempt] = useState(null)
@@ -110,6 +112,9 @@ export function QuizProvider({ children }) {
 				...result,
 			}))
 			setStatus('completed')
+			
+			// Redirect to results page
+			router.push(`/result/${result.attempt_id}`)
 		} catch (err) {
 			console.error('Error finishing quiz:', err)
 			setError(err.message || 'Ошибка отправки ответов')
@@ -117,7 +122,7 @@ export function QuizProvider({ children }) {
 		} finally {
 			setIsLoading(false)
 		}
-	}, [quiz, attempt, answers])
+	}, [quiz, attempt, answers, router])
 
 	/**
 	 * Reset quiz state

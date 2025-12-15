@@ -35,9 +35,14 @@ export default function QuizQuestion() {
 		submitAnswer(currentQuestion.id, value)
 	}
 
-	const handleNext = () => {
+	const handleNext = async () => {
 		if (isLastQuestion) {
-			finishQuiz()
+			try {
+				await finishQuiz()
+			} catch (error) {
+				console.error('Error finishing quiz:', error)
+				alert(error.message || 'Ошибка завершения теста')
+			}
 		} else {
 			nextQuestion()
 		}
@@ -155,26 +160,30 @@ export default function QuizQuestion() {
 						type="button"
 						onClick={(e) => {
 							e.preventDefault()
+							e.stopPropagation()
+							console.log('[QuizQuestion] Prev button clicked')
 							prevQuestion()
 						}}
 						disabled={isFirstQuestion}
-						className="px-6 py-2.5 text-white/70 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed font-medium"
+						className="px-6 py-2.5 text-white/70 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed font-medium cursor-pointer active:scale-95"
 					>
 						Назад
 					</button>
 					<button
 						type="button"
-						onClick={(e) => {
+						onClick={async (e) => {
 							e.preventDefault()
-							handleNext()
+							e.stopPropagation()
+							console.log('[QuizQuestion] Next button clicked, isLastQuestion:', isLastQuestion)
+							await handleNext()
 						}}
 						disabled={!selectedAnswer || isLoading}
 						className={`
-							px-8 py-3 rounded-xl font-semibold text-white transition-all shadow-lg
+							px-8 py-3 rounded-xl font-semibold text-white transition-all shadow-lg cursor-pointer
 							${
 								isLastQuestion
-									? 'bg-white/20 hover:bg-white/30 shadow-white/20'
-									: 'bg-white/15 hover:bg-white/25 shadow-white/10'
+									? 'bg-white/20 hover:bg-white/30 shadow-white/20 active:scale-95'
+									: 'bg-white/15 hover:bg-white/25 shadow-white/10 active:scale-95'
 							}
 							disabled:opacity-50 disabled:cursor-not-allowed
 						`}
