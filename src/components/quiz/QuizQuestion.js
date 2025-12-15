@@ -70,26 +70,33 @@ export default function QuizQuestion() {
 						{currentQuestion.options?.map((option) => (
 							<button
 								key={option.value}
-								onClick={() => handleAnswer(option.value)}
-								className={`w-full text-left glass-card p-4 transition-all ${
+								type="button"
+								onClick={(e) => {
+									e.preventDefault()
+									e.stopPropagation()
+									handleAnswer(option.value)
+								}}
+								className={`w-full text-left glass-card p-4 transition-all cursor-pointer ${
 									selectedAnswer === option.value
 										? 'bg-white/20 border-2 border-white/40'
-										: 'bg-white/5 hover:bg-white/10'
+										: 'bg-white/5 hover:bg-white/10 border border-white/10'
 								}`}
 							>
-								<div className="flex items-center">
-									<div
-										className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${
-											selectedAnswer === option.value
-												? 'border-white bg-white/20'
-												: 'border-white/40'
-										}`}
-									>
-										{selectedAnswer === option.value && (
-											<div className="w-3 h-3 rounded-full bg-white" />
-										)}
+								<div className="flex items-start">
+									<div className="flex-shrink-0 mt-0.5">
+										<div
+											className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center transition-all ${
+												selectedAnswer === option.value
+													? 'border-white bg-white/30'
+													: 'border-white/50 bg-transparent'
+											}`}
+										>
+											{selectedAnswer === option.value && (
+												<div className="w-3 h-3 rounded-full bg-white" />
+											)}
+										</div>
 									</div>
-									<span className="text-white">{option.text}</span>
+									<span className="text-white flex-1">{option.text}</span>
 								</div>
 							</button>
 						))}
@@ -97,18 +104,28 @@ export default function QuizQuestion() {
 				</div>
 
 				{/* Navigation */}
-				<div className="flex justify-between">
+				<div className="flex justify-between gap-4">
 					<button
-						onClick={prevQuestion}
+						type="button"
+						onClick={(e) => {
+							e.preventDefault()
+							e.stopPropagation()
+							prevQuestion()
+						}}
 						disabled={isFirstQuestion}
-						className="glass-button px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+						className="glass-button px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
 					>
 						Назад
 					</button>
 					<button
-						onClick={handleNext}
+						type="button"
+						onClick={(e) => {
+							e.preventDefault()
+							e.stopPropagation()
+							handleNext()
+						}}
 						disabled={!selectedAnswer || isLoading}
-						className="glass-button px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+						className="glass-button px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
 					>
 						{isLoading ? 'Отправка...' : isLastQuestion ? 'Завершить тест' : 'Далее'}
 					</button>

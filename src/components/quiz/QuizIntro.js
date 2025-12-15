@@ -1,11 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useQuiz } from '@/context/QuizContext'
+import TestRulesModal from '../TestRulesModal'
 
 export default function QuizIntro() {
 	const { user } = useAuth()
 	const { quiz, startQuiz, isLoading } = useQuiz()
+	const [showRulesModal, setShowRulesModal] = useState(false)
 
 	if (!quiz) {
 		return (
@@ -17,7 +20,12 @@ export default function QuizIntro() {
 		)
 	}
 
-	const handleStart = async () => {
+	const handleStartClick = () => {
+		setShowRulesModal(true)
+	}
+
+	const handleConfirmStart = async () => {
+		setShowRulesModal(false)
 		try {
 			await startQuiz(quiz.id)
 		} catch (error) {
@@ -58,13 +66,20 @@ export default function QuizIntro() {
 				</div>
 
 				<button
-					onClick={handleStart}
+					onClick={handleStartClick}
 					disabled={isLoading}
 					className="glass-button w-full py-3 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{isLoading ? 'Загрузка...' : 'Начать тест'}
 				</button>
 			</div>
+
+			{/* Rules Modal */}
+			<TestRulesModal
+				isOpen={showRulesModal}
+				onClose={() => setShowRulesModal(false)}
+				onConfirm={handleConfirmStart}
+			/>
 		</div>
 	)
 }
