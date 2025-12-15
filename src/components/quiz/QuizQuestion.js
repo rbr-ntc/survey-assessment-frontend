@@ -67,24 +67,31 @@ export default function QuizQuestion() {
 					<h2 className="text-2xl font-bold text-white mb-6">{currentQuestion.question}</h2>
 
 					{/* Options */}
-					<div className="space-y-3">
+					<div className="space-y-3" onClick={(e) => e.stopPropagation()}>
 						{currentQuestion.options?.map((option) => {
 							const isSelected = selectedAnswer === option.value
 							return (
 								<button
 									key={option.value}
 									type="button"
-									onClick={() => {
-										console.log('[QuizQuestion] Answer clicked:', option.value)
+									onClick={(e) => {
+										e.preventDefault()
+										e.stopPropagation()
+										console.log('[QuizQuestion] Answer clicked:', option.value, 'Question:', currentQuestion.id)
 										handleAnswer(option.value)
 									}}
-									className={`w-full text-left p-4 rounded-xl transition-all cursor-pointer select-none ${
+									onMouseDown={(e) => {
+										e.preventDefault()
+										e.stopPropagation()
+									}}
+									className={`w-full text-left p-4 rounded-xl transition-all cursor-pointer select-none active:scale-[0.98] ${
 										isSelected
 											? 'bg-white/20 border-2 border-white/40 shadow-lg'
 											: 'bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20'
 									} backdrop-blur-sm`}
+									style={{ WebkitTapHighlightColor: 'transparent' }}
 								>
-									<div className="flex items-start gap-4">
+									<div className="flex items-start gap-4 pointer-events-none">
 										{/* Radio button */}
 										<div className="flex-shrink-0 mt-0.5">
 											<div
